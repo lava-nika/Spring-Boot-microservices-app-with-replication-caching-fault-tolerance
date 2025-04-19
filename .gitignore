@@ -1,0 +1,23 @@
+# IntelliJ
+.idea/
+*.iml
+
+# Build output
+target/
+out/
+
+# Logs
+*.log
+
+# OS-specific
+.DS_Store
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Spring Boot devtools
+.spring-boot-devtools.properties
+
+# Env
+.env
+
