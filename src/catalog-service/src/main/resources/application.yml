@@ -1,6 +1,9 @@
 server:
   port: 8081
 
+logging:
+  config: classpath:logback-spring.xml
+
 spring:
   application:
     name: catalog-service

@@ -1,6 +1,16 @@
 server:
   port: 7070
 
+cache:
+  size: 3
+
+order:
+  leader:
+    url: http://localhost:9091
+
+logging:
+  config: classpath:logback-spring.xml
+
 spring:
   application:
     name: frontend-service
