@@ -19,11 +19,6 @@ public class OrderController {
     @Autowired
     private OrderLeaderSelector leaderSelector;
 
-//    @Value("${order.leader.url:http://localhost:9091}")
-//    private String orderServiceUrl;
-
-
-
     private final RestTemplate restTemplate = new RestTemplate();
     private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
@@ -33,7 +28,6 @@ public class OrderController {
         String leaderUrl = leaderSelector.getLeader();
 
         try {
-//            return restTemplate.postForEntity(orderServiceUrl + "/orders", order, Object.class);
             return restTemplate.postForEntity(leaderUrl + "/orders", order, Object.class);
         } catch (Exception e) {
             logger.error("Leader unreachable, resetting");

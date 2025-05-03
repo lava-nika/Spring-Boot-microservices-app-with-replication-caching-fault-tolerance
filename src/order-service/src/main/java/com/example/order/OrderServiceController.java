@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 @RestController
 @RequestMapping("/orders")
 public class OrderServiceController {
@@ -25,9 +24,6 @@ public class OrderServiceController {
 
     @Value("${replica.id}")
     private int replicaId;
-
-//    @Value("#{'${replica.followers:}'.split(',')}")
-//    private List<String> followerUrls;
 
     @Value("#{'${replica.all}'.split(',')}")
     private List<String> allReplicas;
@@ -44,7 +40,6 @@ public class OrderServiceController {
     @PostConstruct
     public void init() {
         logger.info("Replica started with ID: {}", replicaId);
-//        logger.info("Follower replicas: {}", followerUrls);
     }
 
     @PostMapping
@@ -54,15 +49,6 @@ public class OrderServiceController {
         orders.put(orderId, order);
         logger.info("Order created: {}", order);
 
-//        for (String follower : followerUrls) {
-//            try {
-//                restTemplate.postForEntity(follower + "/orders/replicate", order, Void.class);
-//                logger.info("Replicated order {} to {}", orderId, follower);
-//            } catch (Exception e) {
-//                logger.warn("Failed to replicate order {} to {}: {}", orderId, follower, e.getMessage());
-//            }
-//        }
-
         // Propagate to followers if it is leader
         int currentLeaderId = -1;
         String currentLeaderUrl = null;
@@ -70,7 +56,6 @@ public class OrderServiceController {
         for (String url : allReplicas) {
             try {
                 Map<?, ?> res = restTemplate.getForObject(url + "/orders/ping", Map.class);
-//                int id = (int) res.get("replicaId");
                 int id = ((Number) res.get("replicaId")).intValue();
                 if (id > currentLeaderId) {
                     currentLeaderId = id;

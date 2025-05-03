@@ -1,79 +1,3 @@
-/*
-package com.example.frontend;
-
-//import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-@Component
-@ConfigurationProperties(prefix = "order")
-public class OrderLeaderSelector {
-
-    private String leaderUrl;
-    private List<String> replicas;
-
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final AtomicReference<String> currentLeader = new AtomicReference<>(null);
-    private static final Logger logger = LoggerFactory.getLogger(OrderLeaderSelector.class);
-
-//    @Value("${order.replicas}")
-//    private List<String> replicaUrls;
-
-    public List<String> getReplicas() {
-        return replicas;
-    }
-
-    public void setReplicas(List<String> replicas) {
-        this.replicas = replicas;
-    }
-
-    public String getLeader() {
-        if (currentLeader.get() == null) {
-            findLeader();
-        }
-        return currentLeader.get();
-    }
-
-    public void resetLeader() {
-        logger.warn("Resetting leader...");
-        currentLeader.set(null);
-        findLeader();
-    }
-
-    public String findLeader() {
-        int maxId = -1;
-        String leaderUrl = null;
-
-        for (String url : replicas) {
-            try {
-                Map<?, ?> response = restTemplate.getForObject(url + "/ping", Map.class);
-                int replicaId = (int) response.get("replicaId");
-                if (replicaId > maxId) {
-                    maxId = replicaId;
-                    leaderUrl = url;
-                }
-            } catch (Exception e) {
-                System.out.println("Replica unreachable: " + url);
-//                logger.warn("⚠️ Could not reach replica: {}", url);
-            }
-        }
-
-        currentLeader.set(leaderUrl);
-        logger.info("Current leader selected: {}", leaderUrl);
-        return leaderUrl;
-    }
-
-}
- */
-
-
 package com.example.frontend;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -139,7 +63,6 @@ public class OrderLeaderSelector {
 
         for (String url : replicas) {
             try {
-//                Map<?, ?> response = restTemplate.getForObject(url + "/ping", Map.class);
                 Map<?, ?> response = restTemplate.getForObject(url + "/orders/ping", Map.class);
                 if (response != null && response.containsKey("replicaId")) {
                     int replicaId = (int) response.get("replicaId");
@@ -156,9 +79,9 @@ public class OrderLeaderSelector {
 
         currentLeader.set(selectedLeader);
         if (selectedLeader != null) {
-            logger.info("✅ Leader selected: {}", selectedLeader);
+            logger.info("Leader selected: {}", selectedLeader);
         } else {
-            logger.error("❌ No available replicas responded. Leader not selected.");
+            logger.error("No available replicas responded, leader not selected!");
         }
 
         return selectedLeader;
