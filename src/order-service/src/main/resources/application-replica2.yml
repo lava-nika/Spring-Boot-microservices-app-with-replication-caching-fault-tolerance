@@ -1,0 +1,21 @@
+server:
+  port: 9092
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+
+replica:
+  id: 2
+#  followers: []  # followers don’t need to replicate
+  all:
+    - http://localhost:9091
+    - http://localhost:9092
+    - http://localhost:9093
+
+logging:
+  config: classpath:logback-spring.xml
+
+spring:
+  application:
+    name: order-service

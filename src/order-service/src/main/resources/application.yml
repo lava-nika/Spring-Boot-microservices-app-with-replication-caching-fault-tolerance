@@ -1,5 +1,13 @@
 server:
   port: 9091
+  tomcat:
+    threads:
+      max: 200 # Maximum concurrent request threads
+      min-spare: 10 # Minimum idle threads to be kept available
+
+replica:
+  id: 1
+  all: http://localhost:9091,http://localhost:9092,http://localhost:9093
 
 logging:
   config: classpath:logback-spring.xml
