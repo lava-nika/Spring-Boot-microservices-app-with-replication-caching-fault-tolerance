@@ -40,10 +40,19 @@ public class OrderLeaderSelector {
     }
 
     public String getLeader() {
-        if (currentLeader.get() == null) {
-            return findLeader();
+        String current = currentLeader.get();
+        // ping before in order to verify if the current leader is alive
+        if (current != null) {
+            try {
+                restTemplate.getForObject(current + "/orders/ping", Map.class);
+                return current;
+            } catch (Exception e) {
+                logger.warn("current leader {} is unreachable, re-electing leader", current);
+                currentLeader.set(null);
+            }
         }
-        return currentLeader.get();
+        // try to find new leader
+        return findLeader();
     }
 
     public void resetLeader() {

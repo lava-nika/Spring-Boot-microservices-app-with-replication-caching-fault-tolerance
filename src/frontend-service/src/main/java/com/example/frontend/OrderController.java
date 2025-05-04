@@ -28,10 +28,40 @@ public class OrderController {
         String leaderUrl = leaderSelector.getLeader();
 
         try {
-            return restTemplate.postForEntity(leaderUrl + "/orders", order, Object.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(leaderUrl + "/orders", order, Map.class);
+            return ResponseEntity.ok(response.getBody());
         } catch (Exception e) {
             logger.error("Leader unreachable, resetting");
             leaderSelector.resetLeader();
+            String newLeader = leaderSelector.getLeader();
+            if (newLeader == null) {
+                logger.error("No reachable leader after retry.");
+                Map<String, Object> error = new HashMap<>();
+                error.put("code", 500);
+                error.put("message", "All order replicas are unreachable");
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("error", error);
+                return ResponseEntity.status(500).body(response);
+            }
+
+            try {
+                logger.info("Retrying order with new leader: {}", newLeader);
+                ResponseEntity<Map> retryResponse = restTemplate.postForEntity(newLeader + "/orders", order, Map.class);
+                return ResponseEntity.ok(retryResponse.getBody());
+            } catch (Exception retryEx) {
+                logger.error("Retry with new leader {} failed: {}", newLeader, retryEx.getMessage());
+                Map<String, Object> error = new HashMap<>();
+                error.put("code", 500);
+                error.put("message", "Order failed after retrying to switch the leader");
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("error", error);
+                return ResponseEntity.status(500).body(response);
+            }
+
+
+            /*
             Map<String, Object> error = new HashMap<>();
             error.put("code", 500);
             error.put("message", "Order service leader unreachable");
@@ -39,6 +69,7 @@ public class OrderController {
             Map<String, Object> response = new HashMap<>();
             response.put("error", error);
             return ResponseEntity.status(500).body(response);
+            */
         }
     }
 
