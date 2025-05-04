@@ -40,6 +40,7 @@ public class OrderServiceController {
     @PostConstruct
     public void init() {
         logger.info("Replica started with ID: {}", replicaId);
+        syncWithLeader();
     }
 
     @PostMapping
@@ -49,7 +50,7 @@ public class OrderServiceController {
         orders.put(orderId, order);
         logger.info("Order created: {}", order);
 
-        // Propagate to followers if it is leader
+        // Replicate to followers if it is leader
         int currentLeaderId = -1;
         String currentLeaderUrl = null;
 
@@ -69,12 +70,12 @@ public class OrderServiceController {
         if (replicaId == currentLeaderId) {
             logger.info("This replica (ID {}) is the leader. Propagating order.", replicaId);
             for (String url : allReplicas) {
-                if (!url.contains(":" + getServerPort())) {  // avoid self-propagation
+                if (!url.contains(":" + getServerPort())) {  // to avoid self-propagation
                     try {
-                        restTemplate.postForEntity(url + "/orders/propagate", order, String.class);
-                        logger.info("Propagated to {}", url);
+                        restTemplate.postForEntity(url + "/orders/replicate", order, String.class);
+                        logger.info("Replicated to {}", url);
                     } catch (Exception e) {
-                        logger.warn("Failed to propagate to {}: {}", url, e.getMessage());
+                        logger.warn("Failed to replicate to {}: {}", url, e.getMessage());
                     }
                 }
             }
@@ -88,7 +89,7 @@ public class OrderServiceController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/propagate")
+    @PostMapping("/replicate")
     public ResponseEntity<?> replicateOrder(@RequestBody Map<String, Object> order) {
         int orderId = (int) order.get("number");
         orders.put(orderId, order);
@@ -121,6 +122,47 @@ public class OrderServiceController {
         response.put("replicaId", replicaId);
         response.put("status", "alive");
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/sync")
+    public ResponseEntity<?> syncOrders() {
+        Map<String, Object> response = new HashMap<>();
+        // send the order values
+        response.put("orders", orders.values());
+        logger.info("received sync request, sending {} orders", orders.size());
+        return ResponseEntity.ok(response);
+    }
+
+    private void syncWithLeader() {
+        int currentLeaderId = -1;
+        String currentLeaderUrl = null;
+
+        for (String url : allReplicas) {
+            try {
+                Map<?, ?> res = restTemplate.getForObject(url + "/orders/ping", Map.class);
+                int id = (int) res.get("replicaId");
+                if (id > currentLeaderId) {
+                    currentLeaderId = id;
+                    currentLeaderUrl = url;
+                }
+            } catch (Exception e) {
+                logger.warn("Replica unreachable during sync check {}", url);
+            }
+        }
+
+        if (replicaId != currentLeaderId && currentLeaderUrl != null) {
+            try {
+                Map<?, ?> res = restTemplate.getForObject(currentLeaderUrl + "/orders/sync", Map.class);
+                List<Map<String, Object>> syncedOrders = (List<Map<String, Object>>) res.get("orders");
+                for (Map<String, Object> order : syncedOrders) {
+                    int id = (int) order.get("number");
+                    orders.put(id, order);
+                }
+                logger.info("Recovered {} orders from leader {}", syncedOrders.size(), currentLeaderUrl);
+            } catch (Exception e) {
+                logger.warn("Failed to sync from leader {}, {}", currentLeaderUrl, e.getMessage());
+            }
+        }
     }
 
 }
