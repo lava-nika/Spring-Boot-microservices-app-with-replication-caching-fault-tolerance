@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-//import javax.annotation.PostConstruct;
 import jakarta.annotation.PostConstruct;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,17 +11,23 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+// RestController handles frontend-side stock queries along with caching
+// also supports cache invalidation (to be manually triggered)
 @RestController
 @RequestMapping("/stocks")
 public class FrontendCacheController {
 
+    // cache size which can be configured through application.properties (default is 10)
     @Value("${cache.size:10}")
     private int cacheSize;
 
+    // LRU-style cache, implemented using LinkedHashMap with access-order
     private Map<String, String> cache;
+
+    // logger to monitor stock requests and cache behavior
     private static final Logger logger = LoggerFactory.getLogger(FrontendCacheController.class);
 
+    // initializes the LRU cache after the controller is constructed
     @PostConstruct
     public void init() {
         cache = new LinkedHashMap<String, String>(cacheSize, 0.75f, true) {
@@ -33,9 +38,13 @@ public class FrontendCacheController {
         };
     }
 
+    // this handles GET requests to get stock information by stock name
+    // it checks the frontend cache first, if not found it fetches from catalog and stores in cache
     @GetMapping("/{stockName}")
     public ResponseEntity<String> getStock(@PathVariable("stockName") String stockName) {
         logger.info("Stock lookup request received: {}", stockName);
+
+        // check for cache hit
         synchronized (cache) {
             if (cache.containsKey(stockName)) {
                 System.out.println("CACHE HIT for " + stockName);
@@ -47,8 +56,7 @@ public class FrontendCacheController {
             }
         }
 
-        //System.out.println("CACHE MISS for " + stockName);
-
+        // if cache miss, fetch from catalog service
         try {
             String catalogUrl = System.getenv().getOrDefault("CATALOG_URL", "http://localhost:8081");
             logger.info("Fetching {} from catalog at {}", stockName, catalogUrl);
@@ -59,11 +67,12 @@ public class FrontendCacheController {
 
             int status = conn.getResponseCode();
             java.io.InputStream in = (status == 200) ? conn.getInputStream() : conn.getErrorStream();
-            //String response = new String(in.readAllBytes());
+            // read response body
             java.util.Scanner scanner = new java.util.Scanner(in).useDelimiter("\\A");
             String response = scanner.hasNext() ? scanner.next() : "";
             in.close();
 
+            // if success, cache the result and return it
             if (status == 200) {
                 synchronized (cache) {
                     cache.put(stockName, response);
@@ -80,6 +89,7 @@ public class FrontendCacheController {
         }
     }
 
+    // this handles POST requests to invalidate a cached stock manually
     @PostMapping("/invalidate/{stockName}")
     public ResponseEntity<String> invalidate(@PathVariable("stockName") String stockName) {
         synchronized (cache) {
