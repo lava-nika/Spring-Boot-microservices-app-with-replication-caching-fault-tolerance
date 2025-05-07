@@ -47,8 +47,9 @@ public class FrontendCacheController {
         // check for cache hit
         synchronized (cache) {
             if (cache.containsKey(stockName)) {
-                System.out.println("CACHE HIT for " + stockName);
+//                System.out.println("CACHE HIT for " + stockName);
                 logger.info("CACHE HIT: {}", stockName);
+                logger.info("Cache state: {}", cache.keySet());
                 return ResponseEntity.ok(cache.get(stockName));
             }
             else {
@@ -76,6 +77,8 @@ public class FrontendCacheController {
             if (status == 200) {
                 synchronized (cache) {
                     cache.put(stockName, response);
+                    logger.info("Caching new stock: {}", stockName);
+                    logger.info("Cache state: {}", cache.keySet());
                 }
                 logger.info("Caching result for {}", stockName);
                 return ResponseEntity.ok(response);
