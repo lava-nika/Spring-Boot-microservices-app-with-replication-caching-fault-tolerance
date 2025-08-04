@@ -5,13 +5,6 @@ Spring 2025
 
 # Lab 3: Asterix and Double Trouble  --  Replication, Caching, and Fault Tolerance
 
-## Information about your submission
-
-1. Name and email: Lavanika Srinivasaraghavan (lsrinivasara@umass.edu)
-2. Team member name and email: None
-3. Number of late days used for this lab: 1
-4. Number of late days used so far including this lab: 4
-
 ## Goals and Learning Outcomes
 
 The lab has the following learning outcomes with regard to concepts covered in class.
@@ -20,19 +13,6 @@ The lab has the following learning outcomes with regard to concepts covered in c
 * Learn about the concepts of fault tolerance and high availability.
 * Learn about how to deploy your application on the cloud.
 * Optionally learn about Paxos
-
-## Instructions
-
-1. You may work in groups of two for this lab. If you decide to work in groups, you should briefly
-   describe how the work is divided between the two team members in your README file. Be sure to
-   list the names of all team members at the top of this README file.
-2) You can use either Python or Java for this assignment. For this lab, you may use different languages  for different microservices if you want.
-3) Use the following team naming format when you create your team on GitHub: spring24-lab3-GitHubid1-Githubid2. For example, spring24-lab3-alice-bob for a group of two. For a single group team, use spring25-lab3-alice as an example team name for a student with github id alice. If you already chose a different format for your team, edit your team name to the above format. 
-4) Do's and don'ts:
-   - discus lab with other students: allowed
-   - use of AI tools: allowed with full attribution (be sure to read the policy in the course syllabus)
-   - use code from others/Internet/friends/coders for hire: disallowed
-   - ask TAs for clarifications/help: always allowed
 
 ## Lab Description
 
@@ -182,25 +162,6 @@ observations.
 
 If you attempted the extra credit part, include a separate source code folder for this part and also include it in the design doc and show sample output.
 
-
-## Grading Rubric
-
-Parts 1-3 accounts for 70% of the total lab grade:
-
-* Code should have inline comments (5%).
-* GitHub repo should have adequate commits and meaningful commit messages (5%).
-* Source code should build and work correctly (40%).
-* A descriptive design doc should be submitted (15%).
-* An output file should be included (5%).
-
-Part 4 accounts for 30% of the total lab grade:
-
-* Should provide steps in your eval docs about how you deployed your application on AWS. Include
-  scripts in your repo if needed (5%).
-* An eval doc with measurement results and plots (15%).
-* Analysis of the results and answers to the questions in part 3 (10%).
-
-Part 5 acconunts for an extra 15% of the total lab grade
 
 ## References
 
