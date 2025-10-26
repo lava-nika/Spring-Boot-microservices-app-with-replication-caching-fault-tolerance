@@ -12,7 +12,6 @@ The lab has the following learning outcomes with regard to concepts covered in c
 * Learn about caching, replication, and consistency.
 * Learn about the concepts of fault tolerance and high availability.
 * Learn about how to deploy your application on the cloud.
-* Optionally learn about Paxos
 
 ## Lab Description
 
@@ -134,33 +133,6 @@ running, and then bring it back online after some time. Repeat this experiment s
 make sure that you test the case when the leader is killed. Can the clients notice the failures?
 (either during order requests or the final order checking phase) or are they transparent to the
 clients? Do all the order service replicas end up with the same database file?
-
-##  Part 5: Optional part for Extra Credit -  Consensus using Paxos
-
-This part is optional and may be attempted for extra credit. This part can take significant effort and you should attempt it **only if the rest of your lab is complete and in good shape. Limited partial credits will be given for incorrect implementation** 
-
-Assume that the order service is replicated on three nodes. Implement a Paxos consensus protocol to make sure that all replicas can order incoming writes and apply them to the database in the same order. This will ensure that race conditions do not occur where concurrent incoming orders go to two different replicas and get applied to the other replicas in different orders. You need to implement proposer (leader), acceptor, and learner. Furthermore, you will need to keep track of the proposal number. You will further need to show that failures of a order replica does not prevent the others from making progress since the majority of the replicas (2 out of 3) are still up.  The extra credit part is worth 15 points.
-
-
-## What to submit
-
-At the top of this README file add the name(s) and umass email address(es) of all the team members.
-Also if you are working in a group, briefly describe how the work is divided.
-
-You solution should contain source code for both parts separately. Inside the src directory, you
-should have a separate folder for each component/microservice, e.g., a `client` folder for client
-code, a `front-end` folder for the front-end service, etc.
-
-A short README file on how to run your code. Include build/make files if you created any, otherwise
-the README instructions on running the code should provide details on how to do so.
-
-Submit the following additional documents inside the docs directory. 1) A Brief design document (
-2 to 3 pages) that explains your design choices (include citations, if you used referred to Internet
-sources), 2) An Output file (1 to 2 pages), showing sample output or screenshots to indicate your
-program works, and 3) An Evaluation doc (2 to 3 pages), for part 4 showing plots and making
-observations.  
-
-If you attempted the extra credit part, include a separate source code folder for this part and also include it in the design doc and show sample output.
 
 
 ## References
